@@ -21,7 +21,8 @@ void TSQueueEnqueue(TSQueue *q, TSQType e)
             if (q->head->previous == q->head || q->head->previous == q->tail)
             {
                 temp = (qNode *)calloc(1, sizeof(qNode));
-                temp->data = e;
+//                temp->data = e;
+                memcpy(&temp->data, &e, sizeof(TSQType));
                 temp->previous = q->tail;
                 q->head->previous = temp;
                 q->head = temp;
@@ -29,13 +30,15 @@ void TSQueueEnqueue(TSQueue *q, TSQType e)
             else
             {
                 q->head = q->head->previous;
-                q->head->data = e;
+//                q->head->data = e;
+                memcpy(&q->head->data, &e, sizeof(TSQType));
             }
         }
         else
         {
             temp = (qNode *)calloc(1, sizeof(qNode));
-            temp->data = e;
+//            temp->data = e;
+            memcpy(&temp->data, &e, sizeof(TSQType));
             q->head->previous = temp;
             q->head = temp;
         }
@@ -43,7 +46,8 @@ void TSQueueEnqueue(TSQueue *q, TSQType e)
     else
     {
         q->head = (qNode *)calloc(1, sizeof(qNode));
-        q->head->data = e;
+//        q->head->data = e;
+        memcpy(&q->head->data, &e, sizeof(TSQType));
         q->head->previous = q->head;
         q->tail = q->head;
     }
@@ -68,7 +72,8 @@ int TSQueueDeQueue(TSQueue *q, TSQType *out)
         return 0;
     }
 
-    *out = q->tail->data;
+//    *out = q->tail->data;
+    memcpy(out, &q->tail->data, sizeof(TSQType));
     if (q->mem)
     {
        q->tail = q->tail->previous;

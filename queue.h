@@ -12,8 +12,14 @@ extern "C" {
 
 typedef struct {
     TSQType data;
+    struct qNode * next;
     struct qNode * previous;
 } qNode;
+
+typedef enum {
+    FIFO,
+    LIFO
+} QueueType;
 
 typedef struct {
     qNode * head;
@@ -23,15 +29,15 @@ typedef struct {
     pthread_mutex_t mutex;
     int init;
     int mem;
-    int deq;
+    QueueType qt;
 } TSQueue;
 
-// if mem == 1: it will generate a ring queue and donot free memory.
-void TSQueueInit(TSQueue *q, int mem);
+// if mem == 1: it will generate a ring queue and donot free memory on dequeue.
+void TSQueueInit(TSQueue *q, QueueType qt, int mem);
 void TSQueueDestroy(TSQueue *q);
 void TSQueueEnqueue(TSQueue *q, TSQType e);
-int TSQueueDeQueue(TSQueue *q, TSQType *out);
-int TSQueueDeQueueBlocking(TSQueue *q, TSQType *out);
+int TSQueueDequeue(TSQueue *q, TSQType *out);
+int TSQueueDequeueBlocking(TSQueue *q, TSQType *out);
 int TSQueueIsEmpty(TSQueue *q);
 int TSQueueIsEmptyBlocking(TSQueue *q);
 void TSQueueSig(TSQueue *q);

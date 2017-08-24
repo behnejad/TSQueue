@@ -16,7 +16,7 @@ int uslp = 1000;
 int loop = 10000;
 int forloop = 1000;
 int sig = 0;
-#define t 10
+#define t 1000000
 
 unsigned long int getTime()
 {
@@ -50,7 +50,7 @@ void * consumer(void * id)
     int b;
     while(1)
     {
-        if (TSQueueDeQueue(&queue, &b))
+        if (TSQueueDequeue(&queue, &b))
         {
 //            printf("%lu %d\n", getTime(), b);
             pthread_mutex_lock(&mutex);
@@ -69,7 +69,24 @@ void * consumer(void * id)
 int main(int argc, char *argv[])
 {
     pthread_t a[t], con;
-    TSQueueInit(&queue, 1);
+    TSQueueInit(&queue, FIFO, 1);
+
+//    for (int i = 0; i < t; ++i)
+//    {
+//        TSQueueEnqueue(&queue, i);
+////        printf("Enqueue %d\n", i);
+//    }
+
+
+//    for (int i = 0; i < t; ++i)
+//    {
+//        int q;
+//        TSQueueDequeue(&queue, &q);
+////        printf("Dequeue %d\n", q);
+//    }
+
+//    TSQueueDestroy(&queue);
+//    return 0;
 
     for (int l = 0; l < forloop; ++l)
     {

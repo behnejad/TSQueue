@@ -1,3 +1,4 @@
 # TSQueue
 A Simple Thread Safe Queue written in C
-Contribute to complete this module
+
+Contribute for completing this module

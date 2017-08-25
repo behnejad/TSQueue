@@ -17,7 +17,7 @@ int loop = 10000;
 int forloop = 1000;
 int sig = 0;
 #define t 10
-#define t2 800
+#define t2 80000
 
 unsigned long int getTime()
 {
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 
     while (1)
     {
-        TSQueueInit(&queue, FIFO, 1);
+        TSQueueInit(&queue);
         TSQueueEnqueue(&queue, 1);
         TSQueueEnqueue(&queue, 2);
         TSQueueEnqueue(&queue, 3);
@@ -83,8 +83,6 @@ int main(int argc, char *argv[])
         TSQueueDequeue(&queue, &q);
         TSQueueDequeue(&queue, &q);
         TSQueueDequeue(&queue, &q);
-//        printf("%d\n", queue.qLen);
-//        TSQueueTrace(&queue);
 
         for (unsigned int i = 0; i <= t2; ++i)
         {
@@ -92,20 +90,8 @@ int main(int argc, char *argv[])
             TSQueueEnqueue(&queue, i);
             TSQueueDequeue(&queue, &q);
             TSQueueDequeue(&queue, &q);
-        //        printf("Enqueue %d\n", i);
         }
 
-//        TSQueueTrace(&queue);
-//        printf("Dequeue\n");
-
-//        for (unsigned int i = 0; i <= t2; ++i)
-//        {
-//            TSQueueDequeue(&queue, &q);
-//            if (q != i)
-//                break;
-//        }
-//        sleep(5);
-//        printf("Done %d\n", q);
         TSQueueDestroy(&queue);
     }
 
@@ -126,7 +112,6 @@ int main(int argc, char *argv[])
             pthread_join(a[i], NULL);
 
         TSQueueWaitEmpty(&queue);
-//        printf("E\n");
         usleep(1000);
         TSQueueSig(&queue);
 

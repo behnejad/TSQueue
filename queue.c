@@ -1,11 +1,9 @@
 #include "queue.h"
 
-void TSQueueInit(TSQueue *q, QueueType qt, int mem)
+void TSQueueInit(TSQueue *q)
 {
     memset(q, 0, sizeof(TSQueue));
     q->init = 1;
-    q->mem = 0;
-    q->qt = FIFO;
     pthread_cond_init(&q->cond, NULL);
     pthread_mutex_init(&q->mutex, NULL);
 }
@@ -17,40 +15,16 @@ void TSQueueEnqueue(TSQueue *q, TSQType e)
 
     if (q->tail != NULL)
     {
-        if (q->mem)
-        {
-            if (q->head->previous == q->head || q->head->previous == q->tail)
-            {
-                temp = (qNode *)calloc(1, sizeof(qNode));
-                memcpy(&temp->data, &e, sizeof(TSQType));
-                q->head->previous = temp;
-                temp->next = q->head;
-                temp->previous = q->tail;
-                q->tail->next = temp;
-                q->head = temp;
-                ++q->qLen;
-            }
-            else
-            {
-                q->head = q->head->next;
-                memcpy(&q->head->data, &e, sizeof(TSQType));
-            }
-        }
-        else
-        {
-            temp = (qNode *)calloc(1, sizeof(qNode));
-            memcpy(&temp->data, &e, sizeof(TSQType));
-            q->tail->next = temp;
-            q->tail = temp;
-            ++q->qLen;
-        }
+        temp = (qNode *)calloc(1, sizeof(qNode));
+        memcpy(&temp->data, &e, sizeof(TSQType));
+        q->tail->next = temp;
+        q->tail = temp;
     }
     else
     {
         q->tail = (qNode *)calloc(1, sizeof(qNode));
         memcpy(&q->tail->data, &e, sizeof(TSQType));
         q->head = q->tail;
-        ++q->qLen;
     }
     ++(q->count);
     pthread_cond_signal(&q->cond);
@@ -73,56 +47,19 @@ int TSQueueDequeue(TSQueue *q, TSQType *out)
         return 0;
     }
 
-    if (q->mem)
+
+    memcpy(out, &q->head->data, sizeof(TSQType));
+    if (q->head->next)
     {
-        if (q->qt == FIFO)
-        {
-            memcpy(out, &q->tail->data, sizeof(TSQType));
-            if (q->head != q->tail->previous)
-                q->tail = q->tail->previous;
-        }
-        else
-        {
-            memcpy(out, &q->head->data, sizeof(TSQType));
-            if (q->head != q->head->next)
-                q->head = q->head->next;
-        }
+        temp = q->head;
+        q->head = temp->next;
+        free(temp);
     }
     else
     {
-        if (q->qt == FIFO)
-        {
-            memcpy(out, &q->head->data, sizeof(TSQType));
-            if (q->head->next)
-            {
-                temp = q->head;
-                q->head = temp->next;
-                free(temp);
-            }
-            else
-            {
-                free(q->head);
-                q->head = NULL;
-                q->tail = NULL;
-            }
-        }
-        else
-        {
-            memcpy(out, &q->head->data, sizeof(TSQType));
-            if (q->head->next)
-            {
-                temp = q->head;
-                q->head = temp->next;
-                free(temp);
-            }
-            else
-            {
-                free(q->head);
-                q->head = NULL;
-                q->tail = NULL;
-            }
-        }
-        --q->qLen;
+        free(q->head);
+        q->head = NULL;
+        q->tail = NULL;
     }
 
     --q->count;
@@ -169,16 +106,14 @@ void TSQueueDestroy(TSQueue *q)
 {
     qNode * temp;
     pthread_mutex_lock(&q->mutex);
-    if (q->mem == 0)
+    while (q->count--)
     {
-        while (q->count--)
-        {
-            temp = q->head;
-            q->head = temp->next;
-            free(temp);
-        }
-        free(q->head);
+        temp = q->head;
+        q->head = temp->next;
+        free(temp);
     }
+    free(q->head);
+
     q->init = 0;
     q->head = NULL;
     q->tail = NULL;
@@ -211,16 +146,13 @@ void TSQueueTrace(TSQueue *q)
     qNode * temp = q->head;
     if (q->count)
     {
-        if (q->mem == 0)
+        do
         {
-            do
-            {
-                printf("%d ", temp->data);
-                temp = temp->next;
-            }
-            while (temp);
-            printf("\n");
+            printf("%d ", temp->data);
+            temp = temp->next;
         }
+        while (temp);
+        printf("\n");
     }
     pthread_mutex_unlock(&q->mutex);
 }

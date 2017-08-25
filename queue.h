@@ -13,29 +13,19 @@ extern "C" {
 typedef struct {
     TSQType data;
     struct qNode * next;
-    struct qNode * previous;
 } qNode;
-
-typedef enum {
-    FIFO,
-    LIFO
-} QueueType;
 
 typedef struct {
     qNode * head;
     qNode * tail;
     unsigned int count;
-    unsigned int qLen;
     pthread_cond_t cond;
     pthread_mutex_t mutex;
     unsigned int init;
-    int mem;
-    QueueType qt;
 } TSQueue;
 
-// if mem == 1: it will generate a ring queue and donot free memory on dequeue.
-// fifo with realsing memory on dequeue
-void TSQueueInit(TSQueue *q, QueueType qt, int mem);
+// FIFO Queue Implemented
+void TSQueueInit(TSQueue *q);
 void TSQueueDestroy(TSQueue *q);
 void TSQueueEnqueue(TSQueue *q, TSQType e);
 int TSQueueDequeue(TSQueue *q, TSQType *out);

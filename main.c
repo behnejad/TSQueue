@@ -17,7 +17,7 @@ int loop = 10000;
 int forloop = 1000;
 int sig = 0;
 #define t 10
-#define t2 8
+#define t2 800
 
 unsigned long int getTime()
 {
@@ -70,41 +70,45 @@ void * consumer(void * id)
 int main(int argc, char *argv[])
 {
     pthread_t a[t], con;
-    TSQueueInit(&queue, FIFO, 1);
+    unsigned int q;
+
 
     while (1)
     {
-
+        TSQueueInit(&queue, FIFO, 1);
         TSQueueEnqueue(&queue, 1);
         TSQueueEnqueue(&queue, 2);
         TSQueueEnqueue(&queue, 3);
-        unsigned int q;
+
         TSQueueDequeue(&queue, &q);
         TSQueueDequeue(&queue, &q);
         TSQueueDequeue(&queue, &q);
-        printf("%d\n", queue.qLen);
+//        printf("%d\n", queue.qLen);
 //        TSQueueTrace(&queue);
 
         for (unsigned int i = 0; i <= t2; ++i)
         {
             TSQueueEnqueue(&queue, i);
+            TSQueueEnqueue(&queue, i);
+            TSQueueDequeue(&queue, &q);
+            TSQueueDequeue(&queue, &q);
         //        printf("Enqueue %d\n", i);
         }
 
-        TSQueueTrace(&queue);
-        printf("Dequeue\n");
+//        TSQueueTrace(&queue);
+//        printf("Dequeue\n");
 
-        for (unsigned int i = 0; i <= t2; ++i)
-        {
-            TSQueueDequeue(&queue, &q);
+//        for (unsigned int i = 0; i <= t2; ++i)
+//        {
+//            TSQueueDequeue(&queue, &q);
 //            if (q != i)
 //                break;
-        }
-
-        printf("Done %d\n", q);
-
+//        }
+//        sleep(5);
+//        printf("Done %d\n", q);
+        TSQueueDestroy(&queue);
     }
-    TSQueueDestroy(&queue);
+
     return 0;
 
     for (int l = 0; l < forloop; ++l)

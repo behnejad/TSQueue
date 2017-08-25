@@ -3,7 +3,7 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
-QMAKE_CXXFLAGS += -std=c++0x -pthread -Wall
+QMAKE_CXXFLAGS += -std=c++0x -pthread -Wall -O2
 
 LIBS += -pthread
 

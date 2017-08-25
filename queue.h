@@ -34,6 +34,7 @@ typedef struct {
 } TSQueue;
 
 // if mem == 1: it will generate a ring queue and donot free memory on dequeue.
+// fifo with realsing memory on dequeue
 void TSQueueInit(TSQueue *q, QueueType qt, int mem);
 void TSQueueDestroy(TSQueue *q);
 void TSQueueEnqueue(TSQueue *q, TSQType e);

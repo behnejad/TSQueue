@@ -43,6 +43,7 @@ int TSQueueIsEmpty(TSQueue *q);
 int TSQueueIsEmptyBlocking(TSQueue *q);
 void TSQueueSig(TSQueue *q);
 void TSQueueWaitEmpty(TSQueue *q);
+void TSQueueTrace(TSQueue *q);
 
 
 #endif // QUEUE_H

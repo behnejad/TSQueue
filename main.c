@@ -83,6 +83,7 @@ int main(int argc, char *argv[])
         TSQueueDequeue(&queue, &q);
         TSQueueDequeue(&queue, &q);
         printf("%d\n", queue.qLen);
+//        TSQueueTrace(&queue);
 
         for (unsigned int i = 0; i <= t2; ++i)
         {
@@ -90,6 +91,7 @@ int main(int argc, char *argv[])
         //        printf("Enqueue %d\n", i);
         }
 
+        TSQueueTrace(&queue);
         printf("Dequeue\n");
 
         for (unsigned int i = 0; i <= t2; ++i)

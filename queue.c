@@ -19,30 +19,26 @@ void TSQueueEnqueue(TSQueue *q, TSQType e)
     {
         if (q->mem)
         {
-            if (q->head->previous == q->head || q->head->previous == q->tail ||
-                    q->tail->next == q->tail || q->tail->next == q->head)
+            if (q->head->previous == q->head || q->head->previous == q->tail)
             {
                 temp = (qNode *)calloc(1, sizeof(qNode));
-//                temp->data = e;
                 memcpy(&temp->data, &e, sizeof(TSQType));
-                temp->previous = q->tail;
-                q->tail->next = temp;
                 q->head->previous = temp;
                 temp->next = q->head;
+                temp->previous = q->tail;
+                q->tail->next = temp;
                 q->head = temp;
                 ++q->qLen;
             }
             else
             {
-                q->head = q->head->previous;
-//                q->head->data = e;
+                q->head = q->head->next;
                 memcpy(&q->head->data, &e, sizeof(TSQType));
             }
         }
         else
         {
             temp = (qNode *)calloc(1, sizeof(qNode));
-//            temp->data = e;
             memcpy(&temp->data, &e, sizeof(TSQType));
             q->head->previous = temp;
             temp->next = q->head;
@@ -53,7 +49,6 @@ void TSQueueEnqueue(TSQueue *q, TSQType e)
     else
     {
         q->head = (qNode *)calloc(1, sizeof(qNode));
-//        q->head->data = e;
         memcpy(&q->head->data, &e, sizeof(TSQType));
         q->head->previous = q->head;
         q->head->next = q->head;
@@ -61,6 +56,7 @@ void TSQueueEnqueue(TSQueue *q, TSQType e)
         ++q->qLen;
     }
     ++(q->count);
+    printf("Len: %d\n", q->qLen);
     pthread_cond_signal(&q->cond);
     pthread_mutex_unlock(&q->mutex);
 }
@@ -81,18 +77,19 @@ int TSQueueDequeue(TSQueue *q, TSQType *out)
         return 0;
     }
 
-//    *out = q->tail->data;
     if (q->mem)
     {
         if (q->qt == FIFO)
         {
             memcpy(out, &q->tail->data, sizeof(TSQType));
-            q->tail = q->tail->previous;
+            if (q->head != q->tail->previous)
+                q->tail = q->tail->previous;
         }
         else
         {
             memcpy(out, &q->head->data, sizeof(TSQType));
-            q->head = q->head->next;
+            if (q->head != q->head->next)
+                q->head = q->head->next;
         }
     }
     else
@@ -204,4 +201,21 @@ void TSQueueWaitEmpty(TSQueue *q)
         pthread_mutex_unlock(&q->mutex);
         break;
     }
+}
+
+void TSQueueTrace(TSQueue *q)
+{
+    pthread_mutex_lock(&q->mutex);
+    qNode * temp = q->tail;
+    if (q->count)
+    {
+        do
+        {
+            printf("%d ", temp->data);
+            temp = temp->previous;
+        }
+        while (temp != q->tail && temp);
+        printf("\n");
+    }
+    pthread_mutex_unlock(&q->mutex);
 }

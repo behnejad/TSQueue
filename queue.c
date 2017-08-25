@@ -19,7 +19,8 @@ void TSQueueEnqueue(TSQueue *q, TSQType e)
     {
         if (q->mem)
         {
-            if (q->head->previous == q->head || q->head->previous == q->tail)
+            if (q->head->previous == q->head || q->head->previous == q->tail ||
+                    q->tail->next == q->tail || q->tail->next == q->head)
             {
                 temp = (qNode *)calloc(1, sizeof(qNode));
 //                temp->data = e;
@@ -70,7 +71,7 @@ int TSQueueDequeue(TSQueue *q, TSQType *out)
 
     pthread_mutex_lock(&q->mutex);
 
-    if (q->count == 0)
+    while (q->count == 0)
         pthread_cond_wait(&q->cond, &q->mutex);
 
     if (q->count == 0)

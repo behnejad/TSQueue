@@ -17,7 +17,7 @@ int loop = 10000;
 int forloop = 1000;
 int sig = 0;
 #define t 10
-#define t2 40000000
+#define t2 8
 
 unsigned long int getTime()
 {
@@ -70,11 +70,11 @@ void * consumer(void * id)
 int main(int argc, char *argv[])
 {
     pthread_t a[t], con;
-
+    TSQueueInit(&queue, FIFO, 1);
 
     while (1)
     {
-        TSQueueInit(&queue, LIFO, 1);
+
         TSQueueEnqueue(&queue, 1);
         TSQueueEnqueue(&queue, 2);
         TSQueueEnqueue(&queue, 3);
@@ -82,6 +82,7 @@ int main(int argc, char *argv[])
         TSQueueDequeue(&queue, &q);
         TSQueueDequeue(&queue, &q);
         TSQueueDequeue(&queue, &q);
+        printf("%d\n", queue.qLen);
 
         for (unsigned int i = 0; i <= t2; ++i)
         {
@@ -91,17 +92,17 @@ int main(int argc, char *argv[])
 
         printf("Dequeue\n");
 
-        for (unsigned int i = t2; i >= 0; --i)
+        for (unsigned int i = 0; i <= t2; ++i)
         {
             TSQueueDequeue(&queue, &q);
-            if (q != i)
-                break;
+//            if (q != i)
+//                break;
         }
 
         printf("Done %d\n", q);
-        TSQueueDestroy(&queue);
-    }
 
+    }
+    TSQueueDestroy(&queue);
     return 0;
 
     for (int l = 0; l < forloop; ++l)

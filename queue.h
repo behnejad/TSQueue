@@ -8,7 +8,7 @@ extern "C" {
 #include <pthread.h>
 #include <stdlib.h>
 
-#define TSQType int
+#define TSQType unsigned int
 
 typedef struct {
     TSQType data;
@@ -25,9 +25,10 @@ typedef struct {
     qNode * head;
     qNode * tail;
     unsigned int count;
+    unsigned int qLen;
     pthread_cond_t cond;
     pthread_mutex_t mutex;
-    int init;
+    unsigned int init;
     int mem;
     QueueType qt;
 } TSQueue;

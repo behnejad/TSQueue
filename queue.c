@@ -29,6 +29,7 @@ void TSQueueEnqueue(TSQueue *q, TSQType e)
                 q->head->previous = temp;
                 temp->next = q->head;
                 q->head = temp;
+                ++q->qLen;
             }
             else
             {
@@ -45,6 +46,7 @@ void TSQueueEnqueue(TSQueue *q, TSQType e)
             q->head->previous = temp;
             temp->next = q->head;
             q->head = temp;
+            ++q->qLen;
         }
     }
     else
@@ -55,6 +57,7 @@ void TSQueueEnqueue(TSQueue *q, TSQType e)
         q->head->previous = q->head;
         q->head->next = q->head;
         q->tail = q->head;
+        ++q->qLen;
     }
     ++(q->count);
     pthread_cond_signal(&q->cond);
@@ -125,6 +128,7 @@ int TSQueueDequeue(TSQueue *q, TSQType *out)
                 q->tail = NULL;
             }
         }
+        --q->qLen;
     }
 
     --q->count;
@@ -171,15 +175,15 @@ void TSQueueDestroy(TSQueue *q)
 {
     qNode * temp;
     pthread_mutex_lock(&q->mutex);
-
-    while (q->count)
+    while (q->qLen--)
     {
         temp = q->tail;
         q->tail = temp->previous;
         free(temp);
-        --(q->count);
     }
     q->init = 0;
+    q->head = NULL;
+    q->tail = NULL;
     pthread_mutex_unlock(&q->mutex);
 }
 

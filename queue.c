@@ -1,9 +1,10 @@
 #include "queue.h"
 
-void TSQueueInit(TSQueue *q)
+void TSQueueInit(TSQueue *q, QueueType qt)
 {
     memset(q, 0, sizeof(TSQueue));
     q->init = 1;
+    q->qt = qt;
     pthread_cond_init(&q->cond, NULL);
     pthread_mutex_init(&q->mutex, NULL);
 }
@@ -12,19 +13,37 @@ void TSQueueEnqueue(TSQueue *q, TSQType e)
 {
     qNode * temp;
     pthread_mutex_lock(&q->mutex);
-
-    if (q->tail != NULL)
+    if (q->qt == FIFO)
     {
-        temp = (qNode *)calloc(1, sizeof(qNode));
-        memcpy(&temp->data, &e, sizeof(TSQType));
-        q->tail->next = temp;
-        q->tail = temp;
+        if (q->tail != NULL)
+        {
+            temp = (qNode *)calloc(1, sizeof(qNode));
+            memcpy(&temp->data, &e, sizeof(TSQType));
+            q->tail->next = temp;
+            q->tail = temp;
+        }
+        else
+        {
+            q->tail = (qNode *)calloc(1, sizeof(qNode));
+            memcpy(&q->tail->data, &e, sizeof(TSQType));
+            q->head = q->tail;
+        }
     }
     else
     {
-        q->tail = (qNode *)calloc(1, sizeof(qNode));
-        memcpy(&q->tail->data, &e, sizeof(TSQType));
-        q->head = q->tail;
+        if (q->head != NULL)
+        {
+            temp = (qNode *)calloc(1, sizeof(qNode));
+            memcpy(&temp->data, &e, sizeof(TSQType));
+            temp->next = q->head;
+            q->head = temp;
+        }
+        else
+        {
+            q->head = (qNode *)calloc(1, sizeof(qNode));
+            memcpy(&q->head->data, &e, sizeof(TSQType));
+            q->tail = q->head;
+        }
     }
     ++(q->count);
     pthread_cond_signal(&q->cond);
@@ -49,6 +68,7 @@ int TSQueueDequeue(TSQueue *q, TSQType *out)
 
 
     memcpy(out, &q->head->data, sizeof(TSQType));
+
     if (q->head->next)
     {
         temp = q->head;

@@ -15,6 +15,11 @@ typedef struct {
     struct qNode * next;
 } qNode;
 
+typedef enum {
+    FIFO,
+    LIFO
+} QueueType;
+
 typedef struct {
     qNode * head;
     qNode * tail;
@@ -22,10 +27,11 @@ typedef struct {
     pthread_cond_t cond;
     pthread_mutex_t mutex;
     unsigned int init;
+    QueueType qt;
 } TSQueue;
 
-// FIFO Queue Implemented
-void TSQueueInit(TSQueue *q);
+// FIFO And LIFO Queue
+void TSQueueInit(TSQueue *q, QueueType qt);
 void TSQueueDestroy(TSQueue *q);
 void TSQueueEnqueue(TSQueue *q, TSQType e);
 int TSQueueDequeue(TSQueue *q, TSQType *out);

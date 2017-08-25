@@ -72,10 +72,10 @@ int main(int argc, char *argv[])
     pthread_t a[t], con;
     unsigned int q;
 
-
     while (1)
     {
-        TSQueueInit(&queue);
+        break;
+        TSQueueInit(&queue, LIFO);
         TSQueueEnqueue(&queue, 1);
         TSQueueEnqueue(&queue, 2);
         TSQueueEnqueue(&queue, 3);
@@ -94,8 +94,6 @@ int main(int argc, char *argv[])
 
         TSQueueDestroy(&queue);
     }
-
-    return 0;
 
     for (int l = 0; l < forloop; ++l)
     {

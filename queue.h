@@ -13,6 +13,7 @@ extern "C" {
 typedef struct {
     TSQType data;
     struct qNode * next;
+    struct qNode * prev;
 } qNode;
 
 typedef enum {
@@ -27,11 +28,13 @@ typedef struct {
     pthread_cond_t cond;
     pthread_mutex_t mutex;
     unsigned int init;
+    unsigned int mem;
     QueueType qt;
 } TSQueue;
 
-// FIFO And LIFO Queue
-void TSQueueInit(TSQueue *q, QueueType qt);
+// FIFO And LIFO Queue.
+// If mem == 1: Allocated memory will reuse for next enqeues.
+void TSQueueInit(TSQueue *q, QueueType qt, int mem);
 void TSQueueDestroy(TSQueue *q);
 void TSQueueEnqueue(TSQueue *q, TSQType e);
 int TSQueueDequeue(TSQueue *q, TSQType *out);

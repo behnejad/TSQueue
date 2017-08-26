@@ -1,10 +1,11 @@
 #include "queue.h"
 
-void TSQueueInit(TSQueue *q, QueueType qt)
+void TSQueueInit(TSQueue *q, QueueType qt, int mem)
 {
     memset(q, 0, sizeof(TSQueue));
     q->init = 1;
     q->qt = qt;
+    q->mem = (qt == LIFO) ? mem : 0;
     pthread_cond_init(&q->cond, NULL);
     pthread_mutex_init(&q->mutex, NULL);
 }
@@ -13,7 +14,7 @@ void TSQueueEnqueue(TSQueue *q, TSQType e)
 {
     qNode * temp;
     pthread_mutex_lock(&q->mutex);
-    if (q->qt == FIFO)
+    if (q->qt == FIFO) /* FIFO */
     {
         if (q->tail != NULL)
         {
@@ -29,16 +30,29 @@ void TSQueueEnqueue(TSQueue *q, TSQType e)
             q->head = q->tail;
         }
     }
-    else
+    else /* LIFO */
     {
+        /* Existing Element in Queue */
         if (q->head != NULL)
         {
-            temp = (qNode *)calloc(1, sizeof(qNode));
-            memcpy(&temp->data, &e, sizeof(TSQType));
-            temp->next = q->head;
-            q->head = temp;
+            /* If Head has a previous element */
+            if (q->head->prev)
+            {
+                q->head = q->head->prev;
+                memcpy(&q->head->data, &e, sizeof(TSQType));
+            }
+            /* If Head is the first element in Queue */
+            else
+            {
+                temp = (qNode *)calloc(1, sizeof(qNode));
+                memcpy(&temp->data, &e, sizeof(TSQType));
+                temp->next = q->head;
+                if (q->mem)
+                    q->head->prev = temp;
+                q->head = temp;
+            }
         }
-        else
+        else /* Queue is Empty */
         {
             q->head = (qNode *)calloc(1, sizeof(qNode));
             memcpy(&q->head->data, &e, sizeof(TSQType));
@@ -69,12 +83,22 @@ int TSQueueDequeue(TSQueue *q, TSQType *out)
 
     memcpy(out, &q->head->data, sizeof(TSQType));
 
+    /* If Queue has more than 1 elements */
     if (q->head->next)
     {
-        temp = q->head;
-        q->head = temp->next;
-        free(temp);
+        /* If we have a LIFO Queue with mem == 1 */
+        if (q->mem && (q->qt == LIFO))
+            q->head = q->head->next;
+
+        /* FIFO and LIFO with releasing memory after dequeue */
+        else
+        {
+            temp = q->head;
+            q->head = temp->next;
+            free(temp);
+        }
     }
+    /* If Queue 1 element */
     else
     {
         free(q->head);
@@ -126,6 +150,13 @@ void TSQueueDestroy(TSQueue *q)
 {
     qNode * temp;
     pthread_mutex_lock(&q->mutex);
+
+    /* If we have some unused elements in LIFO Queue with mem == 1 */
+    if (q->mem && (q->qt == LIFO))
+        while (q->head->prev)
+            q->head = q->head->prev;
+
+    /* Releasing Memory from the head of Queue */
     while (q->count--)
     {
         temp = q->head;

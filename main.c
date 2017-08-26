@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 
     while (1)
     {
-        TSQueueInit(&queue, FIFO, 1);
+        TSQueueInit(&queue, LIFO, 1);
         TSQueueEnqueue(&queue, 1);
         TSQueueEnqueue(&queue, 2);
         TSQueueEnqueue(&queue, 3);

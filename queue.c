@@ -131,9 +131,12 @@ int TSQueueDequeue(TSQueue *q, TSQType *out)
     /* If Queue has 1 element */
     else
     {
-        free(q->head);
-        q->head = NULL;
-        q->tail = NULL;
+        if (q->mem == 0)
+        {
+            free(q->head);
+            q->head = NULL;
+            q->tail = NULL;
+        }
     }
 
     --q->count;

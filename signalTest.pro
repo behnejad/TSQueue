@@ -1,5 +1,5 @@
 TEMPLATE = app
-CONFIG += console
+CONFIG += console warn_off
 CONFIG -= app_bundle
 CONFIG -= qt
 

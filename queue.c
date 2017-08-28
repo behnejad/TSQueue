@@ -12,9 +12,13 @@ void TSQueueInit(TSQueue *q, QueueType qt, int mem)
 
 void TSQueueEnqueue(TSQueue *q, TSQType e)
 {
+    if (q->init == 0)
+        return;
+
     qNode * temp;
     pthread_mutex_lock(&q->mutex);
-    if (q->qt == FIFO) /* FIFO */
+    /* FIFO */
+    if (q->qt == FIFO)
     {
         if (q->tail)
         {
@@ -43,7 +47,8 @@ void TSQueueEnqueue(TSQueue *q, TSQType e)
             q->head = q->tail;
         }
     }
-    else /* LIFO */
+    /* LIFO */
+    else
     {
         /* Existing Element in Queue */
         if (q->head)
@@ -81,6 +86,9 @@ void TSQueueEnqueue(TSQueue *q, TSQType e)
 int TSQueueDequeue(TSQueue *q, TSQType *out)
 {
     qNode * temp;
+
+    if (q->init == 0)
+        return 0;
 
     pthread_mutex_lock(&q->mutex);
 
@@ -147,12 +155,18 @@ int TSQueueDequeue(TSQueue *q, TSQType *out)
 
 int TSQueueDequeueBlocking(TSQueue *q, TSQType *out)
 {
+    if (q->init == 0)
+        return 0;
+
     while(TSQueueDequeue(q, out) == 0);
     return 1;
 }
 
 int TSQueueIsEmpty(TSQueue *q)
 {
+    if (q->init == 0)
+        return 0;
+
     int t = 0;
     if (q == NULL || q->init == 0)
         return 0;
@@ -165,6 +179,9 @@ int TSQueueIsEmpty(TSQueue *q)
 
 int TSQueueIsEmptyBlocking(TSQueue *q)
 {
+    if (q->init == 0)
+        return 0;
+
     int t = 0;
     if (q == NULL)
         return 0;
@@ -181,6 +198,9 @@ int TSQueueIsEmptyBlocking(TSQueue *q)
 
 void TSQueueDestroy(TSQueue *q)
 {
+    if (q->init == 0)
+        return;
+
     qNode * temp;
     pthread_mutex_lock(&q->mutex);
     /* If we have some unused elements in Queue with mem == 1 */
@@ -224,12 +244,18 @@ void TSQueueDestroy(TSQueue *q)
 
 void TSQueueSig(TSQueue *q)
 {
+    if (q->init == 0)
+        return;
+
     if (q != NULL && q->init == 1)
         pthread_cond_signal(&q->cond);
 }
 
 void TSQueueWaitEmpty(TSQueue *q)
 {
+    if (q->init == 0)
+        return;
+
     while (1)
     {
         pthread_mutex_lock(&q->mutex);
@@ -242,6 +268,9 @@ void TSQueueWaitEmpty(TSQueue *q)
 
 void TSQueueTrace(TSQueue *q)
 {
+    if (q->init == 0)
+        return;
+
     pthread_mutex_lock(&q->mutex);
     qNode * temp = q->head;
     if (q->count)
